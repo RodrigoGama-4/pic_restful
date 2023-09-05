@@ -3,10 +3,8 @@ package com.picpaysimplificado.services;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -24,8 +22,9 @@ public class TransactionService {
     private UserServices userService;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired NotificationService notificationService;
 
-    public void createTransaction(TransactionDTO transaction) throws Exception{
+    public Transaction createTransaction(TransactionDTO transaction) throws Exception{
         User sender = this.userService.findUserById(transaction.senderId());
         User receiver = this.userService.findUserById(transaction.receiverId());
 
@@ -48,6 +47,13 @@ public class TransactionService {
         this.repository.save(newTransaction);
         this.userService.saveUser(receiver);
         this.userService.saveUser(sender);
+
+        this.notificationService.sendNotification(sender, "Transação enviado com sucesso");
+        this.notificationService.sendNotification(receiver, "Transação recebida com sucesso");
+
+
+
+        return newTransaction;
 
 
     }
